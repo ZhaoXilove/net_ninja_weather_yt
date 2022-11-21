@@ -11,14 +11,21 @@
       <ul
         class="absolute bg-weather-secondary text-white w-full shadow-md py-2 px-1 top-[66px]"
         v-if="mapGaodeSearchResults.arr.lives"
+      >
+        <p v-if="searchError">没有找到有关信息</p>
+        {{}}
+        <p v-if="!searchError && mapGaodeSearchResults.arr.lives.length === 0">
+          没有匹配到相关数据
+        </p>
+        <template v-else
+          ><li
+            class="py-2 cursor-pointer"
+            :key="searchResult.adcode"
+            v-for="searchResult in mapGaodeSearchResults.arr.lives"
+          >
+            {{ searchResult.province }}-{{ searchResult.city }}
+          </li></template
         >
-        <li
-          class="py-2 cursor-pointer"
-          :key="searchResult.adcode"
-          v-for="searchResult in mapGaodeSearchResults.arr.lives"
-        >
-          {{ searchResult.province }}-{{ searchResult.city }}
-        </li>
       </ul>
     </div>
   </main>
@@ -31,15 +38,19 @@ const KEY = ref("0bfebabfb6addc48914d7d6785d5298c");
 const searchQuery = ref("");
 const queryTimeout = ref(null);
 const mapGaodeSearchResults = reactive({ arr: [] });
+const searchError = ref(null);
 const getSearchResults = () => {
   clearTimeout(queryTimeout.value);
   queryTimeout.value = setTimeout(async () => {
     if (searchQuery.value !== "") {
-      const result = await axios.get(
-        `https://restapi.amap.com/v3/weather/weatherInfo?key=${KEY.value}&city=${searchQuery.value}`
-      );
-      mapGaodeSearchResults.arr = result.data;
-      console.log(mapGaodeSearchResults.arr);
+      try {
+        const result = await axios.get(
+          `https://restapi.amap.com/v3/weather/weatherInfo?key=${KEY.value}&city=${searchQuery.value}`
+        );
+        mapGaodeSearchResults.arr = result.data;
+      } catch {
+        searchError.value = true;
+      }
       return;
     }
     mapGaodeSearchResults.arr = [];
