@@ -22,6 +22,7 @@
             class="py-2 cursor-pointer"
             :key="searchResult.adcode"
             v-for="searchResult in mapGaodeSearchResults.arr.lives"
+            @click="previewCity(searchResult)"
           >
             {{ searchResult.province }}-{{ searchResult.city }}
           </li></template
@@ -33,7 +34,21 @@
 
 <script setup>
 import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 import axios from "axios";
+
+const previewCity = (searchResult) => {
+  const { city } = searchResult;
+  console.log(city);
+  router.push({
+    name: "cityView",
+    params: {
+      city,
+    },
+  });
+};
+
 const KEY = ref("0bfebabfb6addc48914d7d6785d5298c");
 const searchQuery = ref("");
 const queryTimeout = ref(null);
